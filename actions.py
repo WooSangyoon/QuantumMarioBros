@@ -1,0 +1,1 @@
+from gym_super_mario_bros.actions import SIMPLE_MOVEMENT
