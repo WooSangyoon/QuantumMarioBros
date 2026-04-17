@@ -13,7 +13,7 @@ from gym.wrappers import FrameStack
 def make_train_env():
     env = gym_super_mario_bros.make(ENV_ID)
     env = JoypadSpace(env, SIMPLE_MOVEMENT)
-    # env = SkipFrame(env, skip=4)
+    env = SkipFrame(env, skip=4)
     env = GrayScaleObservation(env)
     env = ResizeObservation(env, shape=84)
     env = FrameStack(env, num_stack=4)
@@ -22,7 +22,7 @@ def make_train_env():
 def make_eval_env():
     env = gym_super_mario_bros.make(ENV_ID)
     env = JoypadSpace(env, SIMPLE_MOVEMENT)
-    # env = SkipFrame(env, skip=4)
+    env = SkipFrame(env, skip=4)
     env = GrayScaleObservation(env)
     env = ResizeObservation(env, shape=84)
     env = FrameStack(env, num_stack=4)
