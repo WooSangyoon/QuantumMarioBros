@@ -1,3 +1,4 @@
+import os
 import time
 import numpy as np
 
@@ -8,6 +9,7 @@ from config import EVAL_RENDER_MODE, SLEEP, ACTION_REPEAT, NUM_EPISODES
 def main():
     mode = "train"
     reward_history = []
+    checkpoint_path = os.path.join("models", "ddqn_mario.pth")
     
     if mode == "eval":
         env = make_eval_env()
@@ -18,6 +20,10 @@ def main():
         state_shape=env.observation_space.shape,
         num_actions=env.action_space.n,
     )
+
+    if os.path.exists(checkpoint_path):
+        agent.load(checkpoint_path)
+        print(f"Loaded checkpoint: {checkpoint_path}")
 
     try:
         for episode in range(1, NUM_EPISODES + 1):
@@ -46,15 +52,17 @@ def main():
                 action_time += 1
 
 
-                env.render(mode=EVAL_RENDER_MODE)
-                time.sleep(SLEEP)
+                # env.render(mode=EVAL_RENDER_MODE)
+                # time.sleep(SLEEP)
                                
-                # if mode == "eval":
-                #     env.render(mode=EVAL_RENDER_MODE)
-                #     time.sleep(SLEEP)
+                if mode == "eval":
+                    env.render(mode=EVAL_RENDER_MODE)
+                    time.sleep(SLEEP)
 
             if mode == "train":
-                agent.decay_epsilon()
+                if episode % 100 == 0:
+                    agent.decay_epsilon()
+                    agent.save(checkpoint_path)
 
             reward_history.append(episode_reward)
             print(
@@ -70,6 +78,7 @@ def main():
         )
 
         if mode == "train":
+            agent.save(checkpoint_path)
             eval_env = make_eval_env()
             try:
                 obs = eval_env.reset()

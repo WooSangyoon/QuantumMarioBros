@@ -1,6 +1,7 @@
 """Double DQN baseline용 agent 뼈대."""
 
 from collections import deque
+import os
 import random
 import numpy as np
 
@@ -121,3 +122,37 @@ class DQNAgent:
 
     def decay_epsilon(self):
         self.epsilon = max(self.epsilon_end, self.epsilon * self.epsilon_decay)
+
+    def save(self, path):
+        directory = os.path.dirname(path)
+        if directory:
+            os.makedirs(directory, exist_ok=True)
+
+        checkpoint = {
+            "online_net_state_dict": self.online_net.state_dict(),
+            "target_net_state_dict": self.target_net.state_dict(),
+            "optimizer_state_dict": self.optimizer.state_dict(),
+            "epsilon": self.epsilon,
+            "update_count": self.update_count,
+            "replay_buffer": list(self.replay_buffer.buffer),
+        }
+        torch.save(checkpoint, path)
+
+    def load(self, path):
+        checkpoint = torch.load(
+            path,
+            map_location=torch.device("cpu"),
+            weights_only=False,
+        )
+        self.online_net.load_state_dict(checkpoint["online_net_state_dict"])
+        self.target_net.load_state_dict(checkpoint["target_net_state_dict"])
+        self.optimizer.load_state_dict(checkpoint["optimizer_state_dict"])
+        self.epsilon = checkpoint.get("epsilon", self.epsilon)
+        self.update_count = checkpoint.get("update_count", 0)
+
+        replay_buffer = checkpoint.get("replay_buffer")
+        if replay_buffer is not None:
+            self.replay_buffer.buffer = deque(
+                replay_buffer,
+                maxlen=self.replay_buffer.capacity,
+            )
