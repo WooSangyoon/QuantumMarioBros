@@ -135,7 +135,11 @@ class DQNAgent:
         if self.update_count % self.target_sync_interval == 0:
             self.sync_target_network()
 
-        return loss.item()
+        return {
+            "loss": loss.item(),
+            "mean_q": current_q.mean().item(),
+            "max_q": current_q.max().item(),
+        }
 
     def sync_target_network(self):
         self.target_net.load_state_dict(self.online_net.state_dict())

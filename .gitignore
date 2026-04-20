@@ -27,3 +27,4 @@ dist/
 *.egg-info/
 
 *.pth
+logs/

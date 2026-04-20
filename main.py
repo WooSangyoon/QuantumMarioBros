@@ -1,3 +1,4 @@
+import csv
 import os
 import time
 import numpy as np
@@ -10,6 +11,7 @@ def main():
     mode = "train"
     reward_history = []
     checkpoint_path = os.path.join("models", "ddqn_mario.pth")
+    log_path = os.path.join("logs", "train_log.csv")
     
     if mode == "eval":
         env = make_eval_env()
@@ -26,6 +28,17 @@ def main():
         agent.load(checkpoint_path)
         print(f"Loaded checkpoint: {checkpoint_path}")
 
+    log_dir = os.path.dirname(log_path)
+    if log_dir:
+        os.makedirs(log_dir, exist_ok=True)
+
+    if not os.path.exists(log_path):
+        with open(log_path, "w", newline="", encoding="utf-8") as csvfile:
+            writer = csv.writer(csvfile)
+            writer.writerow(
+                ["episode", "steps", "loss", "epsilon", "reward", "mean_q", "max_q"]
+            )
+
     try:
         for episode in range(1, NUM_EPISODES + 1):
             obs = env.reset()
@@ -35,6 +48,9 @@ def main():
             episode_reward = 0.0
             step_count = 0
             last_loss = None
+            episode_losses = []
+            episode_mean_qs = []
+            episode_max_qs = []
 
             while not done:
                 if action is None or action_time == ACTION_REPEAT:
@@ -45,7 +61,12 @@ def main():
 
                 if mode == "train":
                     agent.store_transition(obs, action, reward, next_obs, done)
-                    last_loss = agent.update()
+                    update_info = agent.update()
+                    if update_info is not None:
+                        last_loss = update_info["loss"]
+                        episode_losses.append(update_info["loss"])
+                        episode_mean_qs.append(update_info["mean_q"])
+                        episode_max_qs.append(update_info["max_q"])
 
                 obs = next_obs
                 episode_reward += reward
@@ -65,12 +86,31 @@ def main():
                     agent.decay_epsilon()
                     agent.save(checkpoint_path)
 
+            mean_loss = float(np.mean(episode_losses)) if episode_losses else None
+            mean_q = float(np.mean(episode_mean_qs)) if episode_mean_qs else None
+            max_q = float(np.max(episode_max_qs)) if episode_max_qs else None
+
             reward_history.append(episode_reward)
             print(
                 f"Episode {episode}/{NUM_EPISODES} | "
                 f"steps={step_count} | reward={episode_reward:.2f} | "
                 f"epsilon={agent.epsilon:.3f} | loss={last_loss}"
             )
+
+            if mode == "train":
+                with open(log_path, "a", newline="", encoding="utf-8") as csvfile:
+                    writer = csv.writer(csvfile)
+                    writer.writerow(
+                        [
+                            episode,
+                            step_count,
+                            mean_loss,
+                            agent.epsilon,
+                            episode_reward,
+                            mean_q,
+                            max_q,
+                        ]
+                    )
 
         recent_count = min(5, len(reward_history))
         print(
