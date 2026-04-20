@@ -20,6 +20,7 @@ def main():
         state_shape=env.observation_space.shape,
         num_actions=env.action_space.n,
     )
+    print(f"Using device: {agent.device}")
 
     if os.path.exists(checkpoint_path):
         agent.load(checkpoint_path)
@@ -60,7 +61,7 @@ def main():
                     time.sleep(SLEEP)
 
             if mode == "train":
-                if episode % 100 == 0:
+                if episode % 5 == 0:
                     agent.decay_epsilon()
                     agent.save(checkpoint_path)
 

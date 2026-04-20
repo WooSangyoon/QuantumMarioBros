@@ -8,5 +8,3 @@
 <p>
   
 > 🎮 Clearing Super Mario Bros with Quantum Reinforcement Learning
-
- 

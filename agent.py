@@ -2,6 +2,7 @@
 
 from collections import deque
 import os
+import platform
 import random
 import numpy as np
 
@@ -41,8 +42,10 @@ class ReplayBuffer:
 
 class DQNAgent:
     def __init__(self, state_shape, num_actions):
-        self.online_net = DDQN(input_shape=state_shape)
-        self.target_net = DDQN(input_shape=state_shape)
+        self.device = self._get_device()
+
+        self.online_net = DDQN(input_shape=state_shape, num_actions=num_actions).to(self.device)
+        self.target_net = DDQN(input_shape=state_shape, num_actions=num_actions).to(self.device)
         self.target_net.load_state_dict(self.online_net.state_dict())
         self.optimizer = optim.Adam(self.online_net.parameters(), lr=LEARNING_RATE)
         self.replay_buffer = ReplayBuffer(capacity=BUFFER_SIZE)
@@ -54,13 +57,28 @@ class DQNAgent:
         self.num_actions = num_actions
         self.target_sync_interval = TARGET_SYNC_INTERVAL
         self.update_count = 0
+
+    def _get_device(self):
+        system = platform.system()
+
+        if system == "Darwin":
+            if torch.backends.mps.is_available():
+                return torch.device("mps")
+            if torch.cuda.is_available():
+                return torch.device("cuda")
+            return torch.device("cpu")
+
+        if torch.cuda.is_available():
+            return torch.device("cuda")
+
+        return torch.device("cpu")
         
     def _state_to_numpy(self, state):
         return np.array(state, dtype=np.float32)
 
     def select_action(self, state, training=True):
         state_array = self._state_to_numpy(state)
-        state_tensor = torch.tensor(state_array, dtype=torch.float32).unsqueeze(0)
+        state_tensor = torch.tensor(state_array, dtype=torch.float32, device=self.device).unsqueeze(0)
         
         if training and random.random() < self.epsilon:
             action = random.randrange(self.num_actions)
@@ -86,17 +104,19 @@ class DQNAgent:
         states = torch.tensor(
             np.array([self._state_to_numpy(state) for state in states], dtype=np.float32),
             dtype=torch.float32,
+            device=self.device,
         )
-        actions = torch.tensor(actions, dtype=torch.int64).unsqueeze(1)
-        rewards = torch.tensor(rewards, dtype=torch.float32).unsqueeze(1)
+        actions = torch.tensor(actions, dtype=torch.int64, device=self.device).unsqueeze(1)
+        rewards = torch.tensor(rewards, dtype=torch.float32, device=self.device).unsqueeze(1)
         next_states = torch.tensor(
             np.array(
                 [self._state_to_numpy(next_state) for next_state in next_states],
                 dtype=np.float32,
             ),
             dtype=torch.float32,
+            device=self.device,
         )
-        dones = torch.tensor(dones, dtype=torch.float32).unsqueeze(1)
+        dones = torch.tensor(dones, dtype=torch.float32, device=self.device).unsqueeze(1)
 
         current_q = self.online_net(states).gather(1, actions)
 
@@ -141,7 +161,7 @@ class DQNAgent:
     def load(self, path):
         checkpoint = torch.load(
             path,
-            map_location=torch.device("cpu"),
+            map_location=self.device,
             weights_only=False,
         )
         self.online_net.load_state_dict(checkpoint["online_net_state_dict"])
@@ -156,3 +176,8 @@ class DQNAgent:
                 replay_buffer,
                 maxlen=self.replay_buffer.capacity,
             )
+
+        for state in self.optimizer.state.values():
+            for key, value in state.items():
+                if isinstance(value, torch.Tensor):
+                    state[key] = value.to(self.device)
