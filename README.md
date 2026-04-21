@@ -49,7 +49,7 @@ Previous neural network–based reinforcement learning methods suffered from dif
 
 However, DQN tends to overestimate Q-values because it uses the same network for both action selection and evaluation. This can lead to unstable training and degraded performance. DDQN was proposed as a solution to this problem by using separate networks for action selection and evaluation. This approach reduces overestimation and enables more stable learning. 
 
-The network used for action selection is called the Online network, which is updated at every step and used to choose actions. The network used for evaluation is called the Target network, which is updated periodically and used to compute stable target values. This structure leads to more stable performance, especially in environments with large state spaces or unstable rewards. (See [[Figure 1]](#fig1) for the model architecture.)
+The network used for action selection is called the Online network, which is updated at every step and used to choose actions. The network used for evaluation is called the Target network, which is updated periodically and used to compute stable target values. This structure leads to more stable performance, especially in environments with large state spaces or unstable rewards. (See [Figure 1](#fig1) for the model architecture.)
 
 In this project, DDQN is used as the baseline for classical reinforcement learning and is compared with QRL.
 
