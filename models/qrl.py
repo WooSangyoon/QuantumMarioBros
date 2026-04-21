@@ -5,7 +5,7 @@ import torchquantum.functional as tqf
 from pathlib import Path
 
 
-class QuantumDDQN(nn.Module):
+class QRLModel(nn.Module):
     def __init__(self, input_dim=4, num_actions=0):
         super().__init__()
         self.input_dim = input_dim

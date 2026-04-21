@@ -20,9 +20,10 @@
 - [3. Quantum Reinforcement Learning](#3-Quantum-Reinforcement-Learning)
 - [4. Experiments](#4-Experiments)
 - [5. Conclusion](#5-Conclusion)
+- [How to Run](#How-to-Run)
 - [Reference](#Reference)
 
-## <span id="1-Abstract">Abstract</span>
+## <span id="Abstract">Abstract</span>
 TBD
 
 ## <span id="1-Introduction">1. Introduction</span>
@@ -46,9 +47,46 @@ TBD
 ## <span id="5-Conclusion">5. Conclusion</span>
 TBD
 
+
+## <span id="How-to-Run">How to Run</span>
+
+> [!CAUTION]
+> This project is currently under development. Execution commands, dependencies, and other components may be modified or removed during the development process.
+
+### Training
+```bash
+# DDQN
+python main.py --agent ddqn --mode train --episodes 10000
+
+# DDQN with rendering
+python main.py --agent ddqn --mode train --render-train --episodes 10000
+
+# Quantum
+python main.py --agent quantum --mode train --episodes 10000
+
+# Quantum with rendering
+python main.py --agent quantum --mode train --render-train --episodes 10000
+```
+
+### Evaluation
+```bash
+# DDQN
+python main.py --agent ddqn --mode eval --episodes 1
+
+# Quantum
+python main.py --agent quantum --mode eval --episodes 1
+```
+
+### Notes
+
+- `--render-train` enables rendering during training.
+- `eval` mode renders the environment by default.
+- If `--episodes` is omitted, the default value from `config.py` is used.
+
+
+
 ## <span id="Reference">Reference</span>
 
 <span id="ref-dqn">1. Mnih, Volodymyr, et al. "Playing atari with deep reinforcement learning." arXiv preprint arXiv:1312.5602 (2013).</span>
 
 <span id="ref-ddqn">2. Van Hasselt, Hado, Arthur Guez, and David Silver. "Deep reinforcement learning with double q-learning." Proceedings of the AAAI conference on artificial intelligence. Vol. 30. No. 1. 2016.</span>
-

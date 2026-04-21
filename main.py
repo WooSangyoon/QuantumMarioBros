@@ -4,7 +4,7 @@ import time
 import argparse
 import numpy as np
 
-from agent import DDQNAgent, QuantumDDQNAgent
+from agent import DDQNAgent, QuantumAgent
 from env import make_train_env, make_eval_env
 from config import EVAL_RENDER_MODE, SLEEP, ACTION_REPEAT, NUM_EPISODES
 
@@ -27,7 +27,7 @@ def main(agent_type="ddqn", mode="train", episodes=NUM_EPISODES, render_train=Fa
     else:
         env = make_train_env()
 
-    agent_class = DDQNAgent if agent_type == "ddqn" else QuantumDDQNAgent
+    agent_class = DDQNAgent if agent_type == "ddqn" else QuantumAgent
     agent = agent_class(
         state_shape=env.observation_space.shape,
         num_actions=env.action_space.n,

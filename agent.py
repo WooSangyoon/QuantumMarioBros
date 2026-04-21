@@ -9,7 +9,7 @@ import torch.nn.functional as F
 import torch.optim as optim
 
 from models.ddqn import DDQN
-from models.quantum_ddqn import QuantumDDQN
+from models.qrl import QRLModel
 
 from config import (
     BATCH_SIZE,
@@ -185,13 +185,13 @@ class DDQNAgent:
                     state[key] = value.to(self.device)
 
 
-class QuantumDDQNAgent:
+class QuantumAgent:
     def __init__(self, state_shape, num_actions):
         self.device = self._get_device()
         self.quantum_state_dim = 4
 
-        self.online_net = QuantumDDQN(input_dim=self.quantum_state_dim, num_actions=num_actions).to(self.device)
-        self.target_net = QuantumDDQN(input_dim=self.quantum_state_dim, num_actions=num_actions).to(self.device)
+        self.online_net = QRLModel(input_dim=self.quantum_state_dim, num_actions=num_actions).to(self.device)
+        self.target_net = QRLModel(input_dim=self.quantum_state_dim, num_actions=num_actions).to(self.device)
         self.target_net.load_state_dict(self.online_net.state_dict())
         self._export_circuit_diagram_once()
         self.optimizer = optim.Adam(self.online_net.parameters(), lr=LEARNING_RATE)
@@ -219,7 +219,7 @@ class QuantumDDQNAgent:
         return torch.device("cpu")
 
     def _export_circuit_diagram_once(self):
-        circuit_path = os.path.join("images", "quantum_ddqn_circuit.png")
+        circuit_path = os.path.join("images", "quantum_circuit.png")
 
         if os.path.exists(circuit_path):
             return
@@ -245,7 +245,6 @@ class QuantumDDQNAgent:
             chunks = np.array_split(flattened, self.quantum_state_dim)
             state_vector = np.array([chunk.mean() for chunk in chunks], dtype=np.float32)
 
-        # 전처리된 관측값이 0~1 범위이므로, 회전각 인코딩 전에 -1~1 근처로 맞춥니다.
         return (2.0 * state_vector - 1.0).astype(np.float32)
 
     def select_action(self, state, training=True):
