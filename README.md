@@ -38,7 +38,7 @@ This project implements and compares DDQN-based classical reinforcement learning
 ## <span id="2-Double-Deep-Q-Network">2. Double Deep Q-Network (DDQN)</span>
 
 <p>
-<img id="fig1" src="https://raw.githubusercontent.com/WooSangyoon/quantum-mario-bros/main/images/ddqn_architecture" width="300px" />
+<img id="fig1" src="https://raw.githubusercontent.com/WooSangyoon/quantum-mario-bros/main/images/ddqn_architecture.png"/>
 </p>
 
 **Figure 1.** Overall architecture of DDQN.
