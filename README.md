@@ -16,8 +16,8 @@
 ## 📋 Table of Contents
 - [Abstract](#Abstract)
 - [1. Introduction](#1-Introduction)
-- [2. Double Deep Q-Network](#2-Double-Deep-Q-Network)
-- [3. Quantum Reinforcement Learning](#3-Quantum-Reinforcement-Learning)
+- [2. Double Deep Q-Network (DDQN)](#2-Double-Deep-Q-Network)
+- [3. Quantum Reinforcement Learning (QRL)](#3-Quantum-Reinforcement-Learning)
 - [4. Experiments](#4-Experiments)
 - [5. Conclusion](#5-Conclusion)
 - [How to Run](#How-to-Run)
@@ -35,10 +35,21 @@ Recently, there has been growing interest in applying quantum computing principl
 
 This project implements and compares DDQN-based classical reinforcement learning and Quantum Reinforcement Learning (QRL) in the Super Mario Bros. environment. Both approaches are evaluated under identical conditions in terms of learning stability, convergence speed, and policy performance, with the goal of exploring the potential advantages and limitations of QRL.
 
-## <span id="2-Double-Deep-Q-Network">2. Double Deep Q-Network</span>
-TBD
+## <span id="2-Double-Deep-Q-Network">2. Double Deep Q-Network (DDQN)</span>
 
-## <span id="3-Quantum-Reinforcement-Learning">3. Quantum Reinforcement Learning</span>
+![DDQN Architecture](./images/ddqn_architecture.png)
+**Figure 1.** Overall architecture of DDQN.
+<br/>
+
+Previous neural network–based reinforcement learning methods suffered from difficulties in training due to high correlation between data samples and sparse or unstable rewards. To address these issues, DQN was proposed. This approach approximates the state–action value function \( Q(s, a) \) using a neural network, enabling more stable reinforcement learning compared to earlier methods, even in high-dimensional input environments. The agent selects the action with the highest Q-value at each state and updates the network based on the Bellman equation.
+
+However, DQN tends to overestimate Q-values because it uses the same network for both action selection and evaluation. This can lead to unstable training and degraded performance. DDQN was proposed as a solution to this problem by using separate networks for action selection and evaluation. This approach reduces overestimation and enables more stable learning.
+
+The network used for action selection is called the Online network, which is updated at every step and used to choose actions. The network used for evaluation is called the Target network, which is updated periodically and used to compute stable target values. This structure leads to more stable performance, especially in environments with large state spaces or unstable rewards.
+
+In this project, DDQN is used as the baseline for classical reinforcement learning and is compared with QRL.
+
+## <span id="3-Quantum-Reinforcement-Learning">3. Quantum Reinforcement Learning (QRL)</span>
 TBD
 
 ## <span id="4-Experiments">4. Experiments</span>
