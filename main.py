@@ -1,32 +1,48 @@
 import csv
 import os
 import time
+import argparse
 import numpy as np
 
-from agent import DQNAgent
+from agent import DDQNAgent, QuantumDDQNAgent
 from env import make_train_env, make_eval_env
 from config import EVAL_RENDER_MODE, SLEEP, ACTION_REPEAT, NUM_EPISODES
 
-def main():
-    mode = "train"
+def parse_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--agent", choices=["ddqn", "quantum"], default="ddqn")
+    parser.add_argument("--mode", choices=["train", "eval"], default="train")
+    parser.add_argument("--episodes", type=int, default=NUM_EPISODES)
+    parser.add_argument("--render-train", action="store_true")
+    return parser.parse_args()
+
+
+def main(agent_type="ddqn", mode="train", episodes=NUM_EPISODES, render_train=False):
     reward_history = []
-    checkpoint_path = os.path.join("models", "ddqn_mario.pth")
-    log_path = os.path.join("logs", "train_log.csv")
+    checkpoint_path = os.path.join("models", f"{agent_type}_mario.pth")
+    log_path = os.path.join("logs", f"{agent_type}_train_log.csv")
     
     if mode == "eval":
         env = make_eval_env()
     else:
         env = make_train_env()
 
-    agent = DQNAgent(
+    agent_class = DDQNAgent if agent_type == "ddqn" else QuantumDDQNAgent
+    agent = agent_class(
         state_shape=env.observation_space.shape,
         num_actions=env.action_space.n,
     )
     print(f"Using device: {agent.device}")
 
     if os.path.exists(checkpoint_path):
-        agent.load(checkpoint_path)
-        print(f"Loaded checkpoint: {checkpoint_path}")
+        try:
+            agent.load(checkpoint_path)
+            print(f"Loaded checkpoint: {checkpoint_path}")
+        except RuntimeError as error:
+            print(
+                f"Skipped incompatible checkpoint: {checkpoint_path}\n"
+                f"Reason: {error}"
+            )
 
     log_dir = os.path.dirname(log_path)
     if log_dir:
@@ -40,7 +56,7 @@ def main():
             )
 
     try:
-        for episode in range(1, NUM_EPISODES + 1):
+        for episode in range(1, episodes + 1):
             obs = env.reset()
             done = False
             action = None
@@ -80,6 +96,9 @@ def main():
                 if mode == "eval":
                     env.render(mode=EVAL_RENDER_MODE)
                     time.sleep(SLEEP)
+                elif mode == "train" and render_train:
+                    env.render(mode=EVAL_RENDER_MODE)
+                    time.sleep(SLEEP)
 
             if mode == "train":
                 if episode % 5 == 0:
@@ -92,7 +111,7 @@ def main():
 
             reward_history.append(episode_reward)
             print(
-                f"Episode {episode}/{NUM_EPISODES} | "
+                f"Episode {episode}/{episodes} | "
                 f"steps={step_count} | reward={episode_reward:.2f} | "
                 f"epsilon={agent.epsilon:.3f} | loss={last_loss}"
             )
@@ -153,4 +172,10 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    args = parse_args()
+    main(
+        agent_type=args.agent,
+        mode=args.mode,
+        episodes=args.episodes,
+        render_train=args.render_train,
+    )

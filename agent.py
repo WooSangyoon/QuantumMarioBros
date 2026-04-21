@@ -1,5 +1,3 @@
-"""Double DQN baseline용 agent 뼈대."""
-
 from collections import deque
 import os
 import platform
@@ -11,6 +9,8 @@ import torch.nn.functional as F
 import torch.optim as optim
 
 from models.ddqn import DDQN
+from models.quantum_ddqn import QuantumDDQN
+
 from config import (
     BATCH_SIZE,
     LEARNING_RATE,
@@ -40,7 +40,7 @@ class ReplayBuffer:
         return len(self.buffer)
 
 
-class DQNAgent:
+class DDQNAgent:
     def __init__(self, state_shape, num_actions):
         self.device = self._get_device()
 
@@ -62,8 +62,6 @@ class DQNAgent:
         system = platform.system()
 
         if system == "Darwin":
-            if torch.backends.mps.is_available():
-                return torch.device("mps")
             if torch.cuda.is_available():
                 return torch.device("cuda")
             return torch.device("cpu")
@@ -111,6 +109,180 @@ class DQNAgent:
         next_states = torch.tensor(
             np.array(
                 [self._state_to_numpy(next_state) for next_state in next_states],
+                dtype=np.float32,
+            ),
+            dtype=torch.float32,
+            device=self.device,
+        )
+        dones = torch.tensor(dones, dtype=torch.float32, device=self.device).unsqueeze(1)
+
+        current_q = self.online_net(states).gather(1, actions)
+
+        with torch.no_grad():
+            next_actions = self.online_net(next_states).argmax(dim=1, keepdim=True)
+            next_q = self.target_net(next_states).gather(1, next_actions)
+            target_q = rewards + (1 - dones) * self.gamma * next_q
+
+        loss = F.smooth_l1_loss(current_q, target_q)
+
+        self.optimizer.zero_grad()
+        loss.backward()
+        self.optimizer.step()
+        self.update_count += 1
+
+        if self.update_count % self.target_sync_interval == 0:
+            self.sync_target_network()
+
+        return {
+            "loss": loss.item(),
+            "mean_q": current_q.mean().item(),
+            "max_q": current_q.max().item(),
+        }
+
+    def sync_target_network(self):
+        self.target_net.load_state_dict(self.online_net.state_dict())
+
+    def decay_epsilon(self):
+        self.epsilon = max(self.epsilon_end, self.epsilon * self.epsilon_decay)
+
+    def save(self, path):
+        directory = os.path.dirname(path)
+        if directory:
+            os.makedirs(directory, exist_ok=True)
+
+        checkpoint = {
+            "online_net_state_dict": self.online_net.state_dict(),
+            "target_net_state_dict": self.target_net.state_dict(),
+            "optimizer_state_dict": self.optimizer.state_dict(),
+            "epsilon": self.epsilon,
+            "update_count": self.update_count,
+            "replay_buffer": list(self.replay_buffer.buffer),
+        }
+        torch.save(checkpoint, path)
+
+    def load(self, path):
+        checkpoint = torch.load(
+            path,
+            map_location=self.device,
+            weights_only=False,
+        )
+        self.online_net.load_state_dict(checkpoint["online_net_state_dict"])
+        self.target_net.load_state_dict(checkpoint["target_net_state_dict"])
+        self.optimizer.load_state_dict(checkpoint["optimizer_state_dict"])
+        self.epsilon = checkpoint.get("epsilon", self.epsilon)
+        self.update_count = checkpoint.get("update_count", 0)
+
+        replay_buffer = checkpoint.get("replay_buffer")
+        if replay_buffer is not None:
+            self.replay_buffer.buffer = deque(
+                replay_buffer,
+                maxlen=self.replay_buffer.capacity,
+            )
+
+        for state in self.optimizer.state.values():
+            for key, value in state.items():
+                if isinstance(value, torch.Tensor):
+                    state[key] = value.to(self.device)
+
+
+class QuantumDDQNAgent:
+    def __init__(self, state_shape, num_actions):
+        self.device = self._get_device()
+        self.quantum_state_dim = 4
+
+        self.online_net = QuantumDDQN(input_dim=self.quantum_state_dim, num_actions=num_actions).to(self.device)
+        self.target_net = QuantumDDQN(input_dim=self.quantum_state_dim, num_actions=num_actions).to(self.device)
+        self.target_net.load_state_dict(self.online_net.state_dict())
+        self._export_circuit_diagram_once()
+        self.optimizer = optim.Adam(self.online_net.parameters(), lr=LEARNING_RATE)
+        self.replay_buffer = ReplayBuffer(capacity=BUFFER_SIZE)
+        self.gamma = GAMMA
+        self.epsilon = EPSILON_START
+        self.epsilon_end = EPSILON_END
+        self.epsilon_decay = EPSILON_DECAY
+        self.batch_size = BATCH_SIZE
+        self.num_actions = num_actions
+        self.target_sync_interval = TARGET_SYNC_INTERVAL
+        self.update_count = 0
+
+    def _get_device(self):
+        system = platform.system()
+
+        if system == "Darwin":
+            if torch.cuda.is_available():
+                return torch.device("cuda")
+            return torch.device("cpu")
+
+        if torch.cuda.is_available():
+            return torch.device("cuda")
+
+        return torch.device("cpu")
+
+    def _export_circuit_diagram_once(self):
+        circuit_path = os.path.join("images", "quantum_ddqn_circuit.png")
+
+        if os.path.exists(circuit_path):
+            return
+
+        try:
+            self.online_net.export_circuit_diagram(circuit_path)
+            print(f"Saved quantum circuit diagram: {circuit_path}")
+        except Exception as error:
+            print(f"Failed to save quantum circuit diagram: {error}")
+        
+    def _state_to_numpy(self, state):
+        return np.array(state, dtype=np.float32)
+
+    def _state_to_vector(self, state):
+        state_array = self._state_to_numpy(state)
+
+        if state_array.ndim == 3 and state_array.shape[0] == self.quantum_state_dim:
+            state_vector = state_array.mean(axis=(1, 2))
+        elif state_array.ndim == 3 and state_array.shape[-1] == self.quantum_state_dim:
+            state_vector = state_array.mean(axis=(0, 1))
+        else:
+            flattened = state_array.reshape(-1)
+            chunks = np.array_split(flattened, self.quantum_state_dim)
+            state_vector = np.array([chunk.mean() for chunk in chunks], dtype=np.float32)
+
+        # 전처리된 관측값이 0~1 범위이므로, 회전각 인코딩 전에 -1~1 근처로 맞춥니다.
+        return (2.0 * state_vector - 1.0).astype(np.float32)
+
+    def select_action(self, state, training=True):
+        state_array = self._state_to_vector(state)
+        state_tensor = torch.tensor(state_array, dtype=torch.float32, device=self.device).unsqueeze(0)
+        
+        if training and random.random() < self.epsilon:
+            action = random.randrange(self.num_actions)
+        else:
+            with torch.no_grad():
+                q_values = self.online_net(state_tensor)
+                action = int(torch.argmax(q_values, dim=1).item())
+        
+        return action
+
+
+    def store_transition(self, state, action, reward, next_state, done):
+        self.replay_buffer.push(state, action, reward, next_state, done)
+
+
+    def update(self):
+        if len(self.replay_buffer) < self.batch_size:
+            return None
+
+        batch = self.replay_buffer.sample(self.batch_size)
+        states, actions, rewards, next_states, dones = zip(*batch)
+
+        states = torch.tensor(
+            np.array([self._state_to_vector(state) for state in states], dtype=np.float32),
+            dtype=torch.float32,
+            device=self.device,
+        )
+        actions = torch.tensor(actions, dtype=torch.int64, device=self.device).unsqueeze(1)
+        rewards = torch.tensor(rewards, dtype=torch.float32, device=self.device).unsqueeze(1)
+        next_states = torch.tensor(
+            np.array(
+                [self._state_to_vector(next_state) for next_state in next_states],
                 dtype=np.float32,
             ),
             dtype=torch.float32,
