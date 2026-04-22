@@ -33,7 +33,7 @@ Deep Reinforcement Learning addresses these challenges by combining RL with deep
 
 Recently, there has been growing interest in applying quantum computing principles, such as superposition and entanglement, to reinforcement learning. These approaches suggest potential improvements in representation and learning efficiency.
 
-This project implements and compares DDQN-based classical reinforcement learning and Quantum Reinforcement Learning (QRL) in the Super Mario Bros. environment. Both approaches are evaluated under identical conditions in terms of learning stability, convergence speed, and policy performance, with the goal of exploring the potential advantages and limitations of QRL.
+This project implements and compares DDQN-based classical reinforcement learning and Quantum Reinforcement Learning (QRL) in the Super Mario  environment. Both approaches are evaluated under identical conditions in terms of learning stability, convergence speed, and policy performance, with the goal of exploring the potential advantages and limitations of QRL.
 
 ## <span id="2-Double-Deep-Q-Network">2. Double Deep Q-Network (DDQN)</span>
 
@@ -57,7 +57,30 @@ In this project, DDQN is used as the baseline for classical reinforcement learni
 TBD
 
 ## <span id="4-Experiments">4. Experiments</span>
-TBD
+
+### Data Preprocessing
+
+<p>
+<img id="fig2" src="https://raw.githubusercontent.com/WooSangyoon/quantum-mario-bros/main/images/data_preprocessing.png"/>
+</p>
+
+**Figure 2.** Overall architecture of DDQN.
+
+In this project, the model is trained directly from raw data rather than relying on manually engineered features. However, using raw frames as input introduces several challenges, including increased computational cost due to RGB channels, high image resolution, and strong temporal correlation between consecutive frames. These factors can reduce training efficiency and lead to biased learning. To address these issues, we apply a series of preprocessing techniques to improve learning performance.
+
+First, the Super Mario Bros environment exhibits minimal changes between consecutive frames under normal conditions. As a result, using every frame can lead to redundant observations and slow convergence, while also reducing the diversity of training data. To mitigate this, we apply a frame skipping strategy, where only every k-th frame is used for training. In this project, we set k = 4, meaning that the agent processes one frame every four frames.
+
+Next, each frame is converted to grayscale. The original frames consist of three RGB channels, but color information has limited importance for gameplay. Converting frames to grayscale reduces the input dimensionality by a factor of three, significantly improving computational efficiency.
+
+We then resize the frames to a smaller resolution while preserving essential features. In this project, all frames are resized to 84×84 pixels, which reduces computational cost while maintaining relevant spatial information.
+
+Finally, since a single frame does not capture motion dynamics, we stack multiple consecutive frames to provide temporal context. Specifically, we stack four frames to represent the state input. The overall preprocessing pipeline is illustrated in [Figure 2](#fig2).
+
+
+### DDQN
+
+### QRL
+
 
 ## <span id="5-Conclusion">5. Conclusion</span>
 TBD
