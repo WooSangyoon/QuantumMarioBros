@@ -56,13 +56,13 @@ In this project, DDQN is used as the baseline for classical reinforcement learni
 ## <span id="3-Quantum-Reinforcement-Learning">3. Quantum Reinforcement Learning (QRL)</span>
 Quantum Reinforcement Learning (QRL) is a reinforcement learning paradigm that leverages the physical properties of quantum computers. It has gained attention for its potential to explore state spaces more efficiently than classical approaches.
 
-<img id="fig3" src="https://raw.githubusercontent.com/WooSangyoon/quantum-mario-bros/main/images/bloch_sphere.png"  width="250px" />
+<img id="fig2" src="https://raw.githubusercontent.com/WooSangyoon/quantum-mario-bros/main/images/bloch_sphere.png"  width="250px" />
 </p>
 
-**Figure 3.** Bloch sphere representation of a single qubit.<br/>
+**Figure 2.** Bloch sphere representation of a single qubit.<br/>
 (Image source: Bloch sphere diagram, Wikimedia Commons, CC license)
 
-A key distinction between quantum and classical computation lies in the concept of the qubit. While a classical bit can represent either 0 or 1, a qubit can exist in a superposition of both states simultaneously. This property can be intuitively visualized using the Bloch sphere (see [Figure 3](#fig3)). On the Bloch sphere, the north pole corresponds to the $\ket{0}$ state, and the south pole corresponds to the $\ket{1}$ state. Points on the surface of the sphere represent intermediate (superposed) states between these two basis states. To specify a point on the sphere, two angles, $\theta$ and $\phi$, are required (assuming a unit radius).
+A key distinction between quantum and classical computation lies in the concept of the qubit. While a classical bit can represent either 0 or 1, a qubit can exist in a superposition of both states simultaneously. This property can be intuitively visualized using the Bloch sphere (see [Figure 2](#fig2)). On the Bloch sphere, the north pole corresponds to the $\ket{0}$ state, and the south pole corresponds to the $\ket{1}$ state. Points on the surface of the sphere represent intermediate (superposed) states between these two basis states. To specify a point on the sphere, two angles, $\theta$ and $\phi$, are required (assuming a unit radius).
 
 A general qubit state can therefore be expressed as:
 
@@ -83,10 +83,10 @@ These parameters are embedded in parameterized quantum gates (e.g., rotation gat
 ### Data Preprocessing
 
 <p>
-<img id="fig2" src="https://raw.githubusercontent.com/WooSangyoon/quantum-mario-bros/main/images/data_preprocessing.png"/>
+<img id="fig3" src="https://raw.githubusercontent.com/WooSangyoon/quantum-mario-bros/main/images/data_preprocessing.png"/>
 </p>
 
-**Figure 2.** Overall architecture of DDQN.
+**Figure 3.** Data Processing Pipeline.
 
 In this project, the model is trained directly from raw data rather than relying on manually engineered features. However, using raw frames as input introduces several challenges, including increased computational cost due to RGB channels, high image resolution, and strong temporal correlation between consecutive frames. These factors can reduce training efficiency and lead to biased learning. To address these issues, we apply a series of preprocessing techniques to improve learning performance.
 
@@ -96,7 +96,7 @@ Next, each frame is converted to grayscale. The original frames consist of three
 
 We then resize the frames to a smaller resolution while preserving essential features. In this project, all frames are resized to 84×84 pixels, which reduces computational cost while maintaining relevant spatial information.
 
-Finally, since a single frame does not capture motion dynamics, we stack multiple consecutive frames to provide temporal context. Specifically, we stack four frames to represent the state input. The overall preprocessing pipeline is illustrated in [Figure 2](#fig2).
+Finally, since a single frame does not capture motion dynamics, we stack multiple consecutive frames to provide temporal context. Specifically, we stack four frames to represent the state input. The overall preprocessing pipeline is illustrated in [Figure 3](#fig3).
 
 
 ### DDQN
