@@ -59,7 +59,7 @@ Quantum Reinforcement Learning (QRL) is a reinforcement learning paradigm that l
 <img id="fig3" src="https://raw.githubusercontent.com/WooSangyoon/quantum-mario-bros/main/images/bloch_sphere.png"  width="250px" />
 </p>
 
-**Figure 3.** Bloch sphere representation of a single qubit. <br/>
+**Figure 3.** Bloch sphere representation of a single qubit.<br/>
 (Image source: Bloch sphere diagram, Wikimedia Commons, CC license)
 
 A key distinction between quantum and classical computation lies in the concept of the qubit. While a classical bit can represent either 0 or 1, a qubit can exist in a superposition of both states simultaneously. This property can be intuitively visualized using the Bloch sphere (see [Figure 3](#fig3)). On the Bloch sphere, the north pole corresponds to the $\ket{0}$ state, and the south pole corresponds to the $\ket{1}$ state. Points on the surface of the sphere represent intermediate (superposed) states between these two basis states. To specify a point on the sphere, two angles, $\theta$ and $\phi$, are required (assuming a unit radius).
