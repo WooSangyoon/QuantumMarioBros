@@ -54,7 +54,31 @@ The network used for action selection is called the Online network, which is upd
 In this project, DDQN is used as the baseline for classical reinforcement learning and is compared with QRL.
 
 ## <span id="3-Quantum-Reinforcement-Learning">3. Quantum Reinforcement Learning (QRL)</span>
-TBD
+## Quantum Reinforcement Learning
+
+Quantum Reinforcement Learning (QRL) is a reinforcement learning paradigm that leverages the physical properties of quantum computers. It has gained attention for its potential to explore state spaces more efficiently than classical approaches.
+
+<img id="fig3" src="https://raw.githubusercontent.com/WooSangyoon/quantum-mario-bros/main/images/bloch_sphere.png"  width="250px" />
+</p>
+
+**Figure 3.** Bloch sphere representation of a single qubit. 
+(Image source: Bloch sphere diagram, Wikimedia Commons, CC license)
+
+A key distinction between quantum and classical computation lies in the concept of the qubit. While a classical bit can represent either 0 or 1, a qubit can exist in a superposition of both states simultaneously. This property can be intuitively visualized using the Bloch sphere (see [Figure 3](#fig3)). On the Bloch sphere, the north pole corresponds to the $\ket{0}$ state, and the south pole corresponds to the $\ket{1}$ state. Points on the surface of the sphere represent intermediate (superposed) states between these two basis states. To specify a point on the sphere, two angles, $\theta$ and $\phi$, are required (assuming a unit radius).
+
+A general qubit state can therefore be expressed as:
+
+$$
+\cos(\theta/2)\ket{0} + e^{i\phi}\sin(\theta/2)\ket{1}
+$$
+
+Upon measurement, the superposition collapses to either 0 or 1, with probabilities given by the squared magnitudes of the corresponding coefficients (i.e., probability amplitudes). The total probability always sums to 1.
+
+Another important property of quantum systems is entanglement. In an entangled state, measurement outcomes exhibit strong correlations that cannot be explained classically. This feature enables quantum systems to represent complex relationships between variables.
+
+Quantum computers operate by applying quantum gates to qubits, transforming their states through unitary operations, and finally extracting results via measurement. In QRL, the standard reinforcement learning framework (typically modeled as a Markov Decision Process) is preserved. However, the state is encoded into quantum states, and a quantum circuit is used to generate a policy. Actions are selected based on measurement outcomes, and model parameters are updated according to the received rewards.
+
+These parameters are embedded in parameterized quantum gates (e.g., rotation gates), where they control the transformation angles of qubit states during computation.
 
 ## <span id="4-Experiments">4. Experiments</span>
 
