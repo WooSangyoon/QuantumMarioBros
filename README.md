@@ -56,7 +56,7 @@ In this project, DDQN is used as the baseline for classical reinforcement learni
 ## <span id="3-Quantum-Reinforcement-Learning">3. Quantum Reinforcement Learning (QRL)</span>
 Quantum Reinforcement Learning (QRL) is a reinforcement learning paradigm that leverages the physical properties of quantum computers. It has gained attention for its potential to explore state spaces more efficiently than classical approaches.
 
-<img id="fig2" src="https://raw.githubusercontent.com/WooSangyoon/quantum-mario-bros/main/images/bloch_sphere.png"  width="250px" />
+<img id="fig2" src="https://raw.githubusercontent.com/WooSangyoon/quantum-mario-bros/main/images/Bloch_sphere.png"  width="250px" />
 </p>
 
 **Figure 2.** Bloch sphere representation of a single qubit.<br/>
