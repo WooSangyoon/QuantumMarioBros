@@ -54,14 +54,12 @@ The network used for action selection is called the Online network, which is upd
 In this project, DDQN is used as the baseline for classical reinforcement learning and is compared with QRL.
 
 ## <span id="3-Quantum-Reinforcement-Learning">3. Quantum Reinforcement Learning (QRL)</span>
-## Quantum Reinforcement Learning
-
 Quantum Reinforcement Learning (QRL) is a reinforcement learning paradigm that leverages the physical properties of quantum computers. It has gained attention for its potential to explore state spaces more efficiently than classical approaches.
 
 <img id="fig3" src="https://raw.githubusercontent.com/WooSangyoon/quantum-mario-bros/main/images/bloch_sphere.png"  width="250px" />
 </p>
 
-**Figure 3.** Bloch sphere representation of a single qubit. 
+**Figure 3.** Bloch sphere representation of a single qubit. <br/>
 (Image source: Bloch sphere diagram, Wikimedia Commons, CC license)
 
 A key distinction between quantum and classical computation lies in the concept of the qubit. While a classical bit can represent either 0 or 1, a qubit can exist in a superposition of both states simultaneously. This property can be intuitively visualized using the Bloch sphere (see [Figure 3](#fig3)). On the Bloch sphere, the north pole corresponds to the $\ket{0}$ state, and the south pole corresponds to the $\ket{1}$ state. Points on the surface of the sphere represent intermediate (superposed) states between these two basis states. To specify a point on the sphere, two angles, $\theta$ and $\phi$, are required (assuming a unit radius).
